@@ -61,6 +61,36 @@ int breadthFirstSearch (GRAPH graph) {
  
 }
 
+int dfs (int u, GRAPH graph) {
+    
+    int *hood;
+    int i = 0, degree, vPosition;
+    
+    if (u != nil) {
+        
+        hood = neighboors(graph, u);
+        degree = graph.nodes[u].degree;
+        
+        while (i < degree) {
+            vPosition = hood[i]-graph.uLast;
+            
+            if (dist[pairV[vPosition]] == dist[u] + 1) {
+                
+                if (dfs(pairV[vPosition], graph)) {
+                    pairV[vPosition] = u;
+                    pairU[u] = hood[i];
+                    return 1;
+                }
+            }
+            
+            i++;
+        }
+        
+        dist[u] = MAX;
+        return 0;
+    }
+    return 1;
+}
 
 int main() {
     
@@ -75,6 +105,27 @@ int main() {
     for (i = 0; i<graph.numberOfNodes-graph.uLast; i++)
     pairV[i] = 0;
     
-    breadthFirstSearch(graph);
+    for (i=0; i<graph.uLast+1; i++)
+    pairU[i] = 0;
+    
+    int matching = 0;
+    
+    while (breadthFirstSearch(graph)) {
+        i = 0;
+        
+        while (i < graph.uLast+1) {
+            
+            if (pairU[i] == nil) {
+                if (dfs(i, graph)) {
+                    matching++;
+                }
+            }
+            i++;
+        }
+    }
+    
+    matching--;
+    
+    printf("matching: %d\n", matching);
     
 }
