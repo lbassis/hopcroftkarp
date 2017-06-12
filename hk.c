@@ -16,6 +16,7 @@ int breadthFirstSearch (GRAPH graph) {
     
     QUEUE *q = createQueue();
     
+    
     while (i < graph.uLast+1) {
         if (pairU[i] == nil) {
             dist[i] = 0;
@@ -32,15 +33,17 @@ int breadthFirstSearch (GRAPH graph) {
     dist[nil] = MAX;
     
     
+    // search between the free vertices
+    
     while (!isEmpty(q)) {
         i = dequeue(&q);
         
-        if (dist[i] < dist[nil]) {
+        if (dist[i] < dist[nil]) {  // if it was free   (this might be redundant)
             
             degree = graph.nodes[i].degree; // size of i's neighborhood
             j = 0;
             hood = neighboors(graph, i);
-            while (j < degree) {
+            while (j < degree) {            // checks the neighborhood
                 vPosition = hood[j] - graph.uLast;
                 if (dist[pairV[vPosition]] == MAX) {
                     dist[pairV[vPosition]] = dist[i]+1;
@@ -50,6 +53,10 @@ int breadthFirstSearch (GRAPH graph) {
             }
         }
     }
+    
+    destroy(&q);
+    q = NULL;
+     
     
     if (dist[nil] == MAX) {
         return 0;
@@ -96,36 +103,39 @@ int main() {
     
     GRAPH graph = createGraph(stdin);
     
-    pairU = (int*)malloc(sizeof(int)*graph.uLast+1);    // there is no node 0
+    pairU = (int*)malloc(sizeof(int)*(graph.uLast+1));
     pairV = (int*)malloc(sizeof(int)*(graph.numberOfNodes - graph.uLast));
     dist = (int*)malloc(sizeof(int)*graph.numberOfNodes);   // node 0 is NIL
     
     int i;
     
-    for (i = 0; i<graph.numberOfNodes-graph.uLast; i++)
-    pairV[i] = 0;
+    for (i = 0; i<graph.numberOfNodes-graph.uLast; i++) {
+        pairV[i] = nil;
+    }
     
-    for (i=0; i<graph.uLast+1; i++)
-    pairU[i] = 0;
+    for (i=0; i<graph.uLast+1; i++) {
+        pairU[i] = nil;
+    }
     
     int matching = 0;
     
     while (breadthFirstSearch(graph)) {
-        i = 0;
+        i = 1;
         
         while (i < graph.uLast+1) {
-            
             if (pairU[i] == nil) {
                 if (dfs(i, graph)) {
-                    matching++;
+                    matching = matching+1;
                 }
             }
             i++;
         }
     }
     
-    matching--;
+    free(pairU);
+    free(pairV);
     
-    printf("matching: %d\n", matching);
+    printf("%d\n", matching);
+    
     
 }

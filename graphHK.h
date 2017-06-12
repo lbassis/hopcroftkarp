@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #define BUFFER_SIZE 100
 
@@ -14,6 +15,7 @@ typedef struct NODE {
 typedef struct GRAPH {
   int numberOfNodes;
   int numberOfEdges;
+  int uLast;  // last node on the U partition
   int insertedEdges;  // current position on the edges array
   NODE *nodes;
   int *targets;
@@ -25,9 +27,10 @@ void addEdge (GRAPH *graph, int source, int target) {
 
 	position = graph->nodes[source].edgesPosition + graph->nodes[source].currentOffset;
 
-  graph->targets[position] = target;
-  graph->insertedEdges++;
-  graph->nodes[source].currentOffset++;
+    assert(0 <= position && position < graph->numberOfEdges);
+    graph->targets[position] = target;
+    graph->insertedEdges++;
+    graph->nodes[source].currentOffset++;
 }
 
 GRAPH createGraph (FILE *file) {
@@ -46,6 +49,8 @@ GRAPH createGraph (FILE *file) {
 			edges = atoi(strtok(NULL, " "));
 		}
 	}while (buffer[0]  != 'e');
+    
+    edges = edges*2;
 
 	graph.numberOfNodes = nodes+1;	//.gr doesnt have node 0
 	graph.numberOfEdges = edges;
@@ -94,6 +99,8 @@ GRAPH createGraph (FILE *file) {
     edgeTarget = atol(strtok(NULL, " "));
     addEdge(&graph, edgeSource, edgeTarget);
     addEdge(&graph, edgeTarget, edgeSource);
+      
+    graph.uLast = edgeSource; // updates the last node in the u partition
     }
 
 	return graph;
@@ -127,4 +134,21 @@ int isNeighboor (GRAPH graph, int source, int target) {
 	}
 
 	return 0;
+}
+
+int *neighboors (GRAPH graph, int source) { // ESSA NAO FOI TESTADA O SUFICIENTE
+    
+    int i, degree, start;
+    i = 0;
+    degree = graph.nodes[source].degree;
+    start = graph.nodes[source].edgesPosition;
+    
+    int *hood = (int*)malloc(sizeof(int)*degree);
+    
+    while (i < degree) {
+        hood[i] = graph.targets[start+i];
+        i++;
+    }
+    
+    return hood;
 }
