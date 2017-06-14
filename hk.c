@@ -1,15 +1,20 @@
 #include "queue.h"
 #include "graphHK.h"
+#include <sys/time.h>
+#include <math.h>
+
 
 #define nil 0
 #define MAX 65000
 
-// LEMBRAR QUE OS NODOS COMEÇAM EM 1
 
 int *pairU, *pairV, *dist;
+int bfs = 0;
+int dfs = 0;
 
 int breadthFirstSearch (GRAPH graph) {
     
+    bfs++;
     int i = 1;
     int degree, j, vPosition;   // vpairs should use its id - uLast for they start at the uLast position
     int *hood;
@@ -68,8 +73,9 @@ int breadthFirstSearch (GRAPH graph) {
  
 }
 
-int dfs (int u, GRAPH graph) {
+int depthFirstSearch (int u, GRAPH graph) {
     
+    dfs++;
     int *hood;
     int i = 0, degree, vPosition;
     
@@ -83,7 +89,7 @@ int dfs (int u, GRAPH graph) {
             
             if (dist[pairV[vPosition]] == dist[u] + 1) {
                 
-                if (dfs(pairV[vPosition], graph)) {
+                if (depthFirstSearch(pairV[vPosition], graph)) {
                     pairV[vPosition] = u;
                     pairU[u] = hood[i];
                     return 1;
@@ -102,6 +108,11 @@ int dfs (int u, GRAPH graph) {
 int main() {
     
     GRAPH graph = createGraph(stdin);
+    
+    if (graph.numberOfEdges == 0) {
+        printf("0\n");
+        return 0;
+    }
     
     pairU = (int*)malloc(sizeof(int)*(graph.uLast+1));
     pairV = (int*)malloc(sizeof(int)*(graph.numberOfNodes - graph.uLast));
@@ -124,7 +135,7 @@ int main() {
         
         while (i < graph.uLast+1) {
             if (pairU[i] == nil) {
-                if (dfs(i, graph)) {
+                if (depthFirstSearch(i, graph)) {
                     matching = matching+1;
                 }
             }
@@ -134,8 +145,10 @@ int main() {
     
     free(pairU);
     free(pairV);
+
     
     printf("%d\n", matching);
     
     
+    return 0;
 }
